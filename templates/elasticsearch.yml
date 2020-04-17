@@ -1,0 +1,20 @@
+#give your cluster a name.
+cluster.name: ${es_cluster}
+
+#give your nodes a name (change node number from node to node).
+node.name: "es-node-1"
+
+#define node 1 as master-eligible:
+node.master: true
+
+#define nodes 2 and 3 as data nodes:
+node.data: true
+
+#enter the private IP and port of your node:
+#network.host: 172.11.61.27
+network.host: ${host_private_ip}
+http.port: 9200
+
+#detail the private IPs of your nodes:
+#discovery.zen.ping.unicast.hosts: ["172.11.61.27", "172.31.22.131","172.31.32.221"]
+discovery.zen.ping.unicast.hosts: [${node_ips}]
