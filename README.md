@@ -1,14 +1,14 @@
 # es7-azure
 Minimal installation of Elasticsearch 7.x on Free Tier Azure with 3xStandard_D1 nodes
 
-# Elastic Search on Azure - Infrastructure as Code
+### Elastic Search on Azure - Infrastructure as Code
 1. Stand up an elastic search instance using Terraform on Azure
 2. Stand up Azure Event Hubs on Azure using Terraform
 3. Single Azure Function sending stack traces into elastic search every time it is invoked
 4. Show scripts or automated tests to validate the deployment
 
 
-# Possible solutions on Azure:
+### Possible solutions on Azure
 1. TF Fully blown ES cluster + TF Event Hubs + FaaS - ES not possible to execute on Azure Free Tier due to Limit per region: 4 core, 16GB RAM
 2. TF with K8s(AKS) template + Helm ELK charts + TF Event/Serverless - ES not possible to execute on Azure Free Tier due to Limit per region: 4 core, 16GB RAM
 3. TF IaaS (ES, Event hub) + Ansible for config + Serverless for FaaS - ES on 3x Standard_D1 nodes with TF + Ansible to configure cluster + logstash as an aggregator + Serverless for Python App
@@ -18,25 +18,25 @@ Minimal installation of Elasticsearch 7.x on Free Tier Azure with 3xStandard_D1 
 - Azure's machine_scale_set limit is too small on Free Tier
 
 
-# Desired Event Flow Architecture
+### Desired Event Flow Architecture
 
 Event -> App -> Eventhub -> BLOBStorage -> Logstash -> Elasticsearch
 
 
-# Desired UI Client Access
+### Desired UI Client Access
 
 Browser -> SSL Proxy -> Kibana -> Elasticsearch
 
-# Desired API Client Access?
+### Desired API Client Access?
 
 
-# DONE:
+### DONE:
 * TF deployment of 3 nodes with permanent container storage for Elasticsearch cluster
 * bootstrap.sh for Elasticsearch, Logstash, Kibana packages
 * Eventhub created - no BLOB Storage for Logstash ATM
 * Basic configurations, Public IPs, Private IPs
 
-# TODO:
+### TODO:
 * Elasticsearch configuration of a cluster - TF or Ansible needs to set all node IPs
 * TF pass the Eventhub's BLOBStorage output endpoint for logstash
 * send_event app needs to get the Eventhub's input endpoint
