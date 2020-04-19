@@ -4,26 +4,33 @@
 
 
 
-# data "ptivate_ips" {
-#   value = "${azurerm_network_interface.elasticsearch_nic.*.private_ip_address}"
-# }
-#
-# data "template_file" "userdata_script" {
-#   template = "${file("${path.module}/../templates/elasticsearch.yml")}"
-#
-#   vars = {
-#     es_cluster     = "${var.es_cluster}"
-#     es_environment = "${var.environment}-${var.es_cluster}"
-#     node_count     = "${var.node_count}"
-#     node_ips       = "${var.private_ips}"
-#   }
-# }
+data "template_file" "elastic_cfg" {
+  count    = "${var.node_count}"
+  template = "${file("${path.module}/../templates/elasticsearch.yml")}"
 
+  vars = {
+    es_cluster    = "${var.es_cluster}"
+    es_node_name  = "es-${var.es_cluster}-vm${count.index + 1}"
+    host_priv_ip  = "${element(azurerm_network_interface.elasticsearch_nic.*.private_ip_address, count.index)}"
+    priv_node_ips = "[\"${join("\", \"", azurerm_network_interface.elasticsearch_nic.*.private_ip_address)}\" ]"
+    es_masters    = "[\"${join("\", \"", azurerm_virtual_machine.elasticsearch_vms.*.name)}\" ]"
+  }
+}
 
-### TODO:
-# * For VM add depends on nics so the private IPs are available for rendering script above
+data "template_file" "logstash_cfg" {
+  count    = "${var.node_count}"
+  template = "${file("${path.module}/../templates/logstash-eventhub.conf")}"
+
+  vars = {
+    eventhub_conn        = "${azurerm_eventhub_authorization_rule.eventrw.primary_connection_string}"
+    eventdump_conn       = "${azurerm_storage_account.eventdump.primary_connection_string}"
+    event_consumer_group = "${azurerm_eventhub_consumer_group.eventconsumer.name}"
+    host_priv_ip         = "${element(azurerm_network_interface.elasticsearch_nic.*.private_ip_address, count.index)}"
+  }
+}
+
 # create virtual machine
-resource "azurerm_virtual_machine" "elasticsearch_vm" {
+resource "azurerm_virtual_machine" "elasticsearch_vms" {
   count               = "${var.node_count}"
   name                = "es-${var.es_cluster}-vm${count.index + 1}"
   location            = var.azure_location
@@ -84,5 +91,48 @@ resource "null_resource" "elasticsearch" {
 
   provisioner "remote-exec" {
     inline = ["sudo bash templates/bootstrap.sh"]
+  }
+
+  # provisioner "local-exec" {
+  #   command = "cat > ../secrets/elaticsearch${count.index}.yml <<EOL\n${element(data.template_file.elastic_cfg.*.rendered, count.index)}\nEOL"
+  # }
+}
+
+resource "null_resource" "configs_elk" {
+  count = "${var.node_count}"
+  connection {
+    user        = "ubuntu"
+    host        = "${element(azurerm_public_ip.elasticsearch_ips.*.ip_address, count.index)}"
+    private_key = "${file(var.priv_key_path)}"
+    timeout     = 30
+  }
+  depends_on = [
+    # The IP address in Dynamic allocation scheme is only available after VM is created
+    azurerm_virtual_machine.elasticsearch_vms,
+    azurerm_eventhub_authorization_rule.eventrw,
+    azurerm_storage_account.eventdump,
+  ]
+
+  provisioner "remote-exec" {
+    inline = [
+      "sudo tee /etc/elasticsearch/elasticsearch.yml <<EOF",
+      "${element(data.template_file.elastic_cfg.*.rendered, count.index)}",
+      "EOF",
+      "sudo systemctl restart elasticsearch",
+    ]
+    # If cluster does not form correctly check all below
+    ## ES cluster bootstrap (NOTE: node_names must be equal to dns names)
+    # 1. stop
+    # 2. remove data from data.path
+    # 3. cluster start on all nodes
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "sudo tee /etc/logstash/conf.d/eventhub.conf <<EOF",
+      "${element(data.template_file.logstash_cfg.*.rendered, count.index)}",
+      "EOF",
+      "sudo systemctl restart kibana",
+    ]
   }
 }
