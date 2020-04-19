@@ -15,6 +15,9 @@ EXE_PATH=$(dirname $0)
 apt-get -qq update > /dev/null
 DEBIAN_FRONTEND=noninteractive apt-get -qq -y upgrade
 
+MY_PRIVATE_IP=$(curl -s -H Metadata:true "http://169.254.169.254/metadata/instance?api-version=2017-08-01"|jq '.network.interface[].ipv4.ipAddress[].privateIpAddress'|tr -d '"')
+MY_HOSTNAME="$(hostname)"
+
 # Configure syslog
 config_rsyslog() {
   sed -i '17s/^#//' /etc/rsyslog.conf
@@ -58,12 +61,21 @@ install_kibana () {
   local SERVICE="kibana"
   apt-get -y -qq install ${SERVICE}
   if [ "$(systemctl is-active ${SERVICE})" != "active" ]; then
+      sed -i "s|#elasticsearch.hosts:|elasticsearch.hosts:|; s|localhost|${MY_PRIVATE_IP}|" /etc/kibana/kibana.yml
       sudo systemctl enable ${SERVICE}
       sudo systemctl start ${SERVICE}
   fi
 }
 
-#curl -s -H Metadata:true "http://169.254.169.254/metadata/instance?api-version=2017-08-01"|jq .[].name
+check_es_cluster() {
+	number_of_nodes=$(curl -s -X GET "10.1.0.6:9200/_cluster/health?wait_for_status=yellow&timeout=50s&pretty"|jq -r .number_of_nodes)
+  if [ "${number_of_nodes}" == "3"]; then
+    echo "INFO: Cluster formed correctly."
+  else
+    echo "ERR: Custer didn't form"
+    exit 1
+  fi
+}
 
 # Main Script flow
 install_JDK
@@ -72,9 +84,9 @@ install_repo
 install_es7
 
 # Only on vm1 - testing purposes only
-if [[ "$(hostname)" =~ "vm1" ]]; then
+if [[ "${MY_HOSTNAME}" =~ "vm1" ]]; then
   install_kibana
-  install_logstash
 fi
 
+install_logstash
 config_rsyslog

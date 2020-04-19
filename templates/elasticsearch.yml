@@ -2,19 +2,19 @@
 cluster.name: ${es_cluster}
 
 #give your nodes a name (change node number from node to node).
-node.name: "es-node-1"
+node.name: ${es_node_name}
 
-#define node 1 as master-eligible:
-node.master: true
+# Path to directory where to store the data (separate multiple locations by comma):
+path.data: /var/lib/elasticsearch
 
-#define nodes 2 and 3 as data nodes:
-node.data: true
+# Path to log files:
+path.logs: /var/log/elasticsearch
 
 #enter the private IP and port of your node:
-#network.host: 172.11.61.27
-network.host: ${host_private_ip}
+network.host: ${host_priv_ip}
 http.port: 9200
 
 #detail the private IPs of your nodes:
-#discovery.zen.ping.unicast.hosts: ["172.11.61.27", "172.31.22.131","172.31.32.221"]
-discovery.zen.ping.unicast.hosts: [${node_ips}]
+discovery.seed_hosts: ${priv_node_ips}
+# Only for masters - initial cluster setup
+cluster.initial_master_nodes: ${es_masters}
