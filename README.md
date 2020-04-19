@@ -1,12 +1,15 @@
 # es7-azure
 Minimal installation of Elasticsearch 7.x on Free Tier Azure with 3xStandard_D1 nodes
 
-### Elastic Search on Azure - Infrastructure as Code
+### Task 1 Elastic Search on Azure - Infrastructure as Code
 1. Stand up an elastic search instance using Terraform on Azure
 2. Stand up Azure Event Hubs on Azure using Terraform
-3. Single Azure Function sending stack traces into elastic search every time it is invoked
+3. Single :Azure Function sending stack traces into elastic search every time it is invoked
 4. Show scripts or automated tests to validate the deployment
 
+### Task 2 Check elastic cluster
+1. Take Go server from the Gitlab repo and hook it directly to Elastic cluster
+2. Run Go client with load and check how ES cluster performs (we are still in Free Tier)
 
 ### Possible solutions on Azure
 1. TF Fully blown ES cluster + TF Event Hubs + FaaS - ES not possible to execute on Azure Free Tier due to Limit per region: 4 core, 16GB RAM
@@ -22,25 +25,24 @@ Minimal installation of Elasticsearch 7.x on Free Tier Azure with 3xStandard_D1 
 
 Event -> App -> Eventhub -> BLOBStorage -> Logstash -> Elasticsearch
 
-
 ### Desired UI Client Access
-
 Browser -> SSL Proxy -> Kibana -> Elasticsearch
 
 ### Desired API Client Access?
-
+Elasticsearch - Task 2
 
 ### DONE:
 * TF deployment of 3 nodes with permanent container storage for Elasticsearch cluster
+* Elasticsearch configuration of a cluster with TF
 * bootstrap.sh for Elasticsearch, Logstash, Kibana packages
-* Eventhub created - no BLOB Storage for Logstash ATM
-* Basic configurations, Public IPs, Private IPs
+* TF Eventhub's BLOBStorage output endpoint for logstash
+
+
 
 ### TODO:
-* Elasticsearch configuration of a cluster - TF or Ansible needs to set all node IPs
-* TF pass the Eventhub's BLOBStorage output endpoint for logstash
-* send_event app needs to get the Eventhub's input endpoint
+* Send event to Eventhub as the Function App is executed
+* Bash script with curl to drive Function exec in Azure's FaaS
 * Serverless definition YAML for app
 * Test validation scripts for each stage (ES, Kibana, Logstash, Eventhub - TF can use depends on with null_resource test scripts Note:Split TF repo into stages - this would probably get rid of a need for Ansible configuration)
 * End-to-end test validation (ideal would be API call to Function with payload then request elastic to confirm if the same event with matching hash has been delivered and has the same payload, can use Bash/curl/jq or full Python)
-* Security hardening: SSL certs, SSH ciphers, etc - lynis check, Lestencrypt SSL cert for Kibana
+* Security hardening: SSL certs, SSH ciphers, etc - lynis check, Lestencrypt SSL cert for Kibana, Data at rest and in transition with encryption
