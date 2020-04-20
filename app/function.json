@@ -1,7 +1,0 @@
-{
-  "type": "eventHubTrigger",
-  "name": "event",
-  "direction": "in",
-  "eventHubName": "MyEventHub",
-  "connection": "myEventHubReadConnectionAppSetting"
-}
