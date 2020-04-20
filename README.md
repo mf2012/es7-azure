@@ -34,19 +34,13 @@ Elasticsearch - Task 2
 * Elasticsearch configuration of a cluster with TF
 * bootstrap.sh for Elasticsearch, Logstash, Kibana packages
 * TF Eventhub's BLOBStorage output endpoint for logstash
-* Test validation scripts:
-- Elasticsearch
+* Test validation scripts: Elasticsearch
 
 
 ### TODO:
 * Azure Function with TRACE
 * Send TRACE from the Function App to Elasticsearch (direct or via logstash)
 * Bash script with curl to drive Function exec in Azure's FunctionApp
-* Test validation scripts:
-- Eventhub (TF can use depends on with null_resource test scripts Note:Split TF repo into stages, if required)
+* Test validation scripts: Eventhub (TF can use depends on with null_resource test scripts Note:Split TF repo into stages, if required)
 * End-to-end test validation (ideal would be API call to Function, and check in ES if new event is being registered - Bash/Python/jq)
-* Security hardening:
-- Encrypt all the traffic
-- Add Authentication to ES
-- Use SSL Lestencrypt SSL cert for Kibana
-- Encrypt data at rest (enable encryption on storage in Azure)
+* Security hardening: Encrypt all the traffic, Add Authentication to ES, Use SSL Lestencrypt SSL cert for Kibana, Encrypt data at rest (enable encryption on storage in Azure)
