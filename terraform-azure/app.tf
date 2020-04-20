@@ -38,7 +38,7 @@ resource "azurerm_application_insights" "test" {
   name                = "test-terraform-insights"
   location            = "${azurerm_resource_group.test.location}"
   resource_group_name = "${azurerm_resource_group.test.name}"
-  application_type    = "Web"
+  application_type    = "web"
 }
 
 resource "azurerm_function_app" "test" {
@@ -48,7 +48,7 @@ resource "azurerm_function_app" "test" {
   app_service_plan_id       = "${azurerm_app_service_plan.test.id}"
   storage_connection_string = "${azurerm_storage_account.test.primary_connection_string}"
 
-  app_settings {
+  app_settings = {
     "APPINSIGHTS_INSTRUMENTATIONKEY" = "${azurerm_application_insights.test.instrumentation_key}"
   }
 }
