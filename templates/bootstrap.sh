@@ -15,17 +15,8 @@ EXE_PATH=$(dirname $0)
 apt-get -qq update > /dev/null
 DEBIAN_FRONTEND=noninteractive apt-get -qq -y upgrade
 
-MY_PRIVATE_IP=$(curl -s -H Metadata:true "http://169.254.169.254/metadata/instance?api-version=2017-08-01"|jq '.network.interface[].ipv4.ipAddress[].privateIpAddress'|tr -d '"')
 MY_HOSTNAME="$(hostname)"
 
-# Configure syslog
-config_rsyslog() {
-  sed -i '17s/^#//' /etc/rsyslog.conf
-  sed -i '18s/^#//' /etc/rsyslog.conf
-  sed -i '21s/^#//' /etc/rsyslog.conf
-  sed -i '22s/^#//' /etc/rsyslog.conf
-  service rsyslog restart
-}
 install_JDK () {
   DEBIAN_FRONTEND=noninteractive apt-get -qq -y install apt-transport-https openjdk-11-jdk-headless curl jq
 }
@@ -59,21 +50,16 @@ install_logstash () {
 
 install_kibana () {
   local SERVICE="kibana"
+  local MY_PRIVATE_IP=$(curl -s -H Metadata:true "http://169.254.169.254/metadata/instance?api-version=2017-08-01"|jq '.network.interface[].ipv4.ipAddress[].privateIpAddress'|tr -d '"')
   apt-get -y -qq install ${SERVICE}
   if [ "$(systemctl is-active ${SERVICE})" != "active" ]; then
-      sed -i "s|#elasticsearch.hosts:|elasticsearch.hosts:|; s|localhost|${MY_PRIVATE_IP}|" /etc/kibana/kibana.yml
       sudo systemctl enable ${SERVICE}
-      sudo systemctl start ${SERVICE}
   fi
-}
-
-check_es_cluster() {
-	number_of_nodes=$(curl -s -X GET "10.1.0.6:9200/_cluster/health?wait_for_status=yellow&timeout=50s&pretty"|jq -r .number_of_nodes)
-  if [ "${number_of_nodes}" == "3"]; then
-    echo "INFO: Cluster formed correctly."
+  if [ "${MY_PRIVATE_IP}"  != "" ]; then
+    sudo sed -i "s|#elasticsearch.hosts:.*$|elasticsearch.hosts: [http://${MY_PRIVATE_IP}:9200]|" /etc/kibana/kibana.yml
+    sudo systemctl restart ${SERVICE}
   else
-    echo "ERR: Custer didn't form"
-    exit 1
+    echo "WARN: Elastic IP is not set in Kibana"
   fi
 }
 
@@ -82,11 +68,9 @@ install_JDK
 # Elastic+Logstash+kibana
 install_repo
 install_es7
-
+install_logstash
 # Only on vm1 - testing purposes only
 if [[ "${MY_HOSTNAME}" =~ "vm1" ]]; then
+  sleep 15
   install_kibana
 fi
-
-install_logstash
-config_rsyslog
