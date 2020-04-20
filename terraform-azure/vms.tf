@@ -29,6 +29,16 @@ data "template_file" "logstash_cfg" {
   }
 }
 
+data "template_file" "logstash_cfg_json" {
+  count    = "${var.node_count}"
+  template = "${file("${path.module}/../templates/logstash-json.conf")}"
+
+  vars = {
+    host_priv_ip = "${element(azurerm_network_interface.elasticsearch_nic.*.private_ip_address, count.index)}"
+  }
+}
+
+
 # create virtual machine
 resource "azurerm_virtual_machine" "elasticsearch_vms" {
   count               = "${var.node_count}"
@@ -120,11 +130,7 @@ resource "null_resource" "configs_elk" {
       "EOF",
       "sudo systemctl restart elasticsearch",
     ]
-    # If cluster does not form correctly check all below
-    ## ES cluster bootstrap (NOTE: node_names must be equal to dns names)
-    # 1. stop
-    # 2. remove data from data.path
-    # 3. cluster start on all nodes
+
   }
 
   provisioner "remote-exec" {
@@ -132,7 +138,15 @@ resource "null_resource" "configs_elk" {
       "sudo tee /etc/logstash/conf.d/eventhub.conf <<EOF",
       "${element(data.template_file.logstash_cfg.*.rendered, count.index)}",
       "EOF",
-      "sudo systemctl restart kibana",
+    ]
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "sudo tee /etc/logstash/conf.d/tcpjson.conf <<EOF",
+      "${element(data.template_file.logstash_cfg_json.*.rendered, count.index)}",
+      "EOF",
+      "sudo systemctl restart logstash",
     ]
   }
 }

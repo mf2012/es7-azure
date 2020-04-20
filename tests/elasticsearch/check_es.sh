@@ -8,11 +8,14 @@ if [ "$1" == "" ]; then
   exit 1
 fi
 
-public_node_ip=${1}
-
 public_node_ip=$1
 
 check_es_cluster() {
+  # If cluster does not form correctly check all below
+  ## ES cluster bootstrap (NOTE: node_names must be equal to dns names)
+  # 1. stop
+  # 2. remove data from data.path on all nodes
+  # 3. cluster start on all nodes
   number_of_nodes="$(curl -s -X GET "${public_node_ip}:9200/_cluster/health?wait_for_status=yellow&timeout=50s&pretty"|jq -r .number_of_nodes)"
   if [ "${number_of_nodes}" == "3" ]; then
     echo "INFO: Elastic Cluster formed correctly."
