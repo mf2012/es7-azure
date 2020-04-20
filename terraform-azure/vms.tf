@@ -13,7 +13,7 @@ data "template_file" "elastic_cfg" {
     es_node_name  = "es-${var.es_cluster}-vm${count.index + 1}"
     host_priv_ip  = "${element(azurerm_network_interface.elasticsearch_nic.*.private_ip_address, count.index)}"
     priv_node_ips = "[\"${join("\", \"", azurerm_network_interface.elasticsearch_nic.*.private_ip_address)}\" ]"
-    es_masters    = "[\"${join("\", \"", azurerm_virtual_machine.elasticsearch_vms.*.name)}\" ]"
+    es_masters    = "\n- ${join("\n- ", azurerm_virtual_machine.elasticsearch_vms.*.name)}"
   }
 }
 
