@@ -36,6 +36,7 @@ install_es7 () {
   if [ "$(systemctl is-active ${SERVICE})" != "active" ]; then
     sudo systemctl enable ${SERVICE}
     sudo systemctl start ${SERVICE}
+    # systemctl stop elasticsearch.service && rm -rf /var/lib/elasticsearch/* &&  systemctl start elasticsearch.service
   fi
 }
 
@@ -68,9 +69,8 @@ install_JDK
 # Elastic+Logstash+kibana
 install_repo
 install_es7
-install_logstash
 # Only on vm1 - testing purposes only
 if [[ "${MY_HOSTNAME}" =~ "vm1" ]]; then
-  sleep 15
+  install_logstash
   install_kibana
 fi
