@@ -126,7 +126,11 @@ functions:
           name: eventHubMessages # Specifies which name it's available on `context`
           eventHubName: eventshub1 # Specifies the Name of the Event Hub
           consumerGroup: $Default # Specifies the consumerGroup to listen with
+<<<<<<< HEAD
           connection: Endpoint=sb://eventsns1.servicebus.windows.net/;SharedAccessKeyName=eventsauthrw1;SharedAccessKey=fdoNhKlf9WpGjVcIdm3RbDuIw9m4vY23IhxMcNnmA+E=;EntityPath=eventshub1  # App Setting/environment variable which contains Event Hubs Namespace Connection String
+=======
+          connection: <evenhub connection string>
+>>>>>>> 4bc2e35bb6f710639c00c0056fecc16d79c4335b
   # serviceBusQueue:
   #   handler: src/handlers/serviceBusQueue
   #   events:

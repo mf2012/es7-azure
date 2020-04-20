@@ -39,6 +39,10 @@ build/Release
 # Dependency directories
 node_modules/
 jspm_packages/
+<<<<<<< HEAD
+=======
+package-lock.json
+>>>>>>> 4bc2e35bb6f710639c00c0056fecc16d79c4335b
 
 # TypeScript v1 declaration files
 typings/
@@ -100,4 +104,8 @@ __pycache__/
 # Virtual Environments
 env/
 .env/
+<<<<<<< HEAD
 .venv/
+=======
+.venv/
+>>>>>>> 4bc2e35bb6f710639c00c0056fecc16d79c4335b
