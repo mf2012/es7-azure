@@ -1,6 +1,8 @@
 # es7-azure
 Minimal installation of Elasticsearch 7.x on Free Tier Azure with 3xStandard_D1 nodes
 
+[Presentation](../doc/ES7_code_challenge.pdf)
+
 ### Task 1 Elastic Search on Azure - Infrastructure as Code
 1. Stand up an Elasticsearch instance using Terraform on Azure
 2. Stand up Azure Event Hubs on Azure using Terraform
@@ -35,12 +37,10 @@ Elasticsearch - Task 2
 * bootstrap.sh for Elasticsearch, Logstash, Kibana packages
 * TF Eventhub's BLOBStorage output endpoint for logstash
 * Test validation scripts: Elasticsearch
-
+* Bash script with curl to drive Function exec in Azure's FunctionApp
 
 ### TODO:
-* Azure Function with TRACE
-* Send TRACE from the Function App to Elasticsearch (direct or via logstash)
-* Bash script with curl to drive Function exec in Azure's FunctionApp
-* Test validation scripts: Eventhub (TF can use depends on with null_resource test scripts Note:Split TF repo into stages, if required)
+* Deploy FunctionApp with TRACE enabled (manually done)
+* Test validation scripts: Eventhub
 * End-to-end test validation (ideal would be API call to Function, and check in ES if new event is being registered - Bash/Python/jq)
 * Security hardening: Encrypt all the traffic, Add Authentication to ES, Use SSL Lestencrypt SSL cert for Kibana, Encrypt data at rest (enable encryption on storage in Azure)
