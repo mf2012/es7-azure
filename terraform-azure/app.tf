@@ -39,6 +39,25 @@ resource "azurerm_app_service_plan" "test" {
   }
 }
 
+resource "azurerm_storage_container" "test" {
+  name = "function-releases"
+
+  storage_account_name  = "${azurerm_storage_account.test.name}"
+  container_access_type = "private"
+}
+
+# resource "azurerm_storage_blob" "sb-testDeployTF" {
+#   name = "functionapp.zip"
+#
+#   resource_group_name    = "${azurerm_resource_group.elasticsearch.name}"
+#   storage_account_name   = "${azurerm_storage_account.test.name}"
+#   storage_container_name = "${azurerm_storage_container.test.name}"
+#
+#   type   = "block"
+#   source = "../app/functionapp.zip"
+# }
+
+
 resource "azurerm_application_insights" "test" {
   name                = "test-terraform-insights"
   location            = "${var.azure_location}"
