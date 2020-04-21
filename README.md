@@ -1,7 +1,7 @@
 # es7-azure
 Minimal installation of Elasticsearch 7.x on Free Tier Azure with 3xStandard_D1 nodes
 
-[Presentation](../doc/ES7_code_challenge.pdf)
+**Small PDF presentation in doc/ES7_code_challenge.pdf**
 
 ### Task 1 Elastic Search on Azure - Infrastructure as Code
 1. Stand up an Elasticsearch instance using Terraform on Azure
